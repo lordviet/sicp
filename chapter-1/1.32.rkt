@@ -32,20 +32,16 @@
   (define null-value 0)
   (accumulate sum-combiner null-value identity a inc b))
 
-(define (sum-iter a b)
-  (define (sum-combiner x y)
-    (+ x y))  
+(define (sum-iter a b)  
   (define null-value 0)
-  (accumulate-iter sum-combiner null-value identity a inc b))
+  (accumulate-iter + null-value identity a inc b))
 
 (sum 1 100) ; Value: 5050
 (sum-iter 1 100) ; Value: 5050
 
-(define (product a b)
-  (define (product-combiner x y)
-    (* x y))  
+(define (product a b)  
   (define null-value 1)
-  (accumulate product-combiner null-value identity a inc b))
+  (accumulate * null-value identity a inc b))
 
 (define (product-iter a b)
   (define (product-combiner x y)
