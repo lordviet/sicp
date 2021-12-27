@@ -22,8 +22,9 @@
 ; Helpers
 (define (identity x)
     x)
-  (define (inc x)
-    (+ x 1))
+
+(define (inc x)
+  (+ x 1))
 
 (define (sum a b)
   (define (sum-combiner x y)
