@@ -17,10 +17,6 @@
 (define (compose f g)
   (lambda (x) (f (g x))))
 
-(define (square x) (* x x))
-
-(define (inc x) (+ x 1))
-
 (define (average a b)
   (/ (+ a b) 2))
 
@@ -32,3 +28,32 @@
 (define (average-damp f)
   (lambda (x) (average x (f x))))
 
+(define (sqrt x)
+  (fixed-point (average-damp (lambda (y) (/ x y)))
+               1.0))
+
+(sqrt 25)
+
+(define (cubert x)
+  (fixed-point ((repeated average-damp 2)
+                (lambda (y) (/ x (* y y)))) 1.0))
+
+(cubert 27)
+
+(define (root n x)
+  (fixed-point ((repeated average-damp (- n 1))
+                (lambda (y) (/ x (expt y (- n 1))))) 1.0))
+
+; Solution to use minimal damping
+(define (root-min-damping n x)
+  (fixed-point ((repeated average-damp (floor (log n 2)))
+                (lambda (y) (/ x (expt y (- n 1))))) 1.0))
+
+(root 3 27)
+(root-min-damping 3 27)
+(root 2 25)
+(root-min-damping 2 25)
+(root 4 16)
+(root-min-damping 4 16)
+(root 5 32)
+(root-min-damping 5 32)
