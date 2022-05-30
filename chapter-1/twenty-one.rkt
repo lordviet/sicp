@@ -48,6 +48,20 @@
       (best-total-iter
        (calculate-result result (strip-color (first hand)))
        (bf hand))))
+
+(define (ace-count count hand)
+  (if (empty? hand)
+      count
+      (ace-count
+       (if (equal? (strip-color (first hand)) 'A)
+           (+ count 1)
+           count)
+       (bf hand))))
+
+(ace-count 0 '(AD AS 9H AC)) ; should be 3
+(ace-count 0 '(AC)) ; should be 1
+(ace-count 0 '(9H JH)) ; should be 0
+(newline)
 ; End Helpers
 
 ;(equal? (strip-color (first '(AD 8S))) 'A)
