@@ -1,7 +1,10 @@
 #lang racket
 (require berkeley)
+(require racket/trace)
 
 ; Helpers
+
+; Checks if a card is a picture card (K, Q, J)
 (define (is-picture-card? card)
   (if (or (equal? card 'K)
           (equal? card 'Q)
@@ -9,46 +12,16 @@
        #t
        #f))
 
+;(print "is-picture-card? tests")
+;(newline)
 ;(is-picture-card? 'J) ; should be #t
 ;(is-picture-card? 'Q) ; should be #t
 ;(is-picture-card? 'K) ; should be #t
 ;(is-picture-card? 'A) ; should be #f
 ;(is-picture-card? '9) ; should be #f
+;(newline)
 
-; Chooses best ace-value based on the total
-; TODO: Add tests
-(define (calculate-ace-value total)
-  (define big-ace-value 11)
-  (define small-ace-value 1)
-  (if (> (+ total big-ace-value) 21)
-      small-ace-value
-      big-ace-value))
-
-; TODO Add Tests
-(define (calculate-result current-result current-card)
-  (define picture-card-value 10) ; All picture cards are 10 pts
-  (cond ((equal? (first current-card) 'A) ; If the card is an ace we determine the best value
-         (+ (calculate-ace-value current-result)
-            current-result))
-        ((is-picture-card? current-card) ; If the card is a picture-card (K, Q, J), we add 10 pts
-         (+ current-result
-            picture-card-value))
-        (else ; Otherwise we just add it to the total
-         (+
-          current-result
-          current-card))))
-
-(define (strip-color card)
-  (first card))
-;(calculate-result 19 'A)
-
-(define (best-total-iter result hand)
-  (if (empty? hand)
-      result
-      (best-total-iter
-       (calculate-result result (strip-color (first hand)))
-       (bf hand))))
-
+; Counts the number of aces in a hand
 (define (ace-count count hand)
   (if (empty? hand)
       count
@@ -58,30 +31,88 @@
            count)
        (bf hand))))
 
-(ace-count 0 '(AD AS 9H AC)) ; should be 3
-(ace-count 0 '(AC)) ; should be 1
-(ace-count 0 '(9H JH)) ; should be 0
-(newline)
+;(print "ace-count tests")
+;(newline)
+;(ace-count 0 '(AD AS 9H AC)) ; should be 3
+;(ace-count 0 '(AC)) ; should be 1
+;(ace-count 0 '(9H JH)) ; should be 0
+;(newline)
+
+; Chooses best ace-value (11 or 1) based on the total
+(define (calculate-ace-value total)
+  (define max-possible-value 21)
+  (define big-ace-value 11)
+  (define small-ace-value 1)
+  (if (> (+ total big-ace-value) max-possible-value)
+      small-ace-value
+      big-ace-value))
+
+;(print "calculate-ace-value")
+;(newline)
+;(calculate-ace-value 20) ; should be 1
+;(calculate-ace-value 10) ; should be 11
+;(newline)
+
+; Adds the values of the aces to the total value
+(define (ace-iter ace-count total) 
+  (if (= ace-count 0)
+      total
+      (ace-iter
+       (- ace-count 1)
+       (+ total (calculate-ace-value total)))))
+
+;(print "ace-iter test")
+;(newline)
+;(ace-iter 3 5) ; should be 18
+;(ace-iter 2 9) ; should be 21
+;(ace-iter 0 13) ; should be 13
+;(newline)
+
+; Adds the value of the current-card to the current result while skipping the aces
+(define (calculate-no-ace-result current-result current-card)
+  (define picture-card-value 10) ; All picture cards are 10 pts
+  (cond ((equal? current-card 'A) ; If the card is an Ace we skip it
+         current-result)
+         ((is-picture-card? current-card) ; If the card is a picture-card (K, Q, J), we add 10 pts
+         (+ current-result
+            picture-card-value))
+        (else ; Otherwise we just add it to the total
+         (+
+          current-result
+          current-card))))
+
+; Retains only the card without the color AS -> A
+(define (strip-color card)
+  (first card))
+
+; Calculates the total result without the aces
+(define (no-ace-total-iter result hand)
+  (if (empty? hand)
+      result
+      (no-ace-total-iter
+       (calculate-no-ace-result result (strip-color (first hand)))
+       (bf hand))))
+
+; Calculates the best total result with the aces
+(define (best-total-iter hand)
+  (ace-iter
+   (ace-count 0 hand)
+   (no-ace-total-iter 0 hand)))
+
 ; End Helpers
 
-;(equal? (strip-color (first '(AD 8S))) 'A)
-
+; First we find the ace count
+; Then we find the total result without the aces
+; Finally we add the aces to the result to get the best-total
 (define (best-total hand)
-  (best-total-iter 0 hand))
+  (best-total-iter hand))
 
+(print "best-total test")
+(newline)
 (best-total '(AD 8S)) ; should be 19
 (best-total '(AD AS 9H)) ; should be 21
-
-;TODO: Modification is needed, first calculate other values and leave the aces for last
-(best-total '(AD 8S 5H)) ; should be 14 IMPORTANT!
-
-;(equal? (first 'AS) 'A) ; this is true
-;(first '(A3 JH Q2))
-;(bf '(A3 JH Q2))
-;(+ 10 '3) ; this is valid and will be 13
-
-;(equal? 'KS (first '(KS, JG)))
-
+(best-total '(AD 8S 5H)) ; should be 14
+(newline)
 
 (define (twenty-one strategy)
   (define (play-dealer customer-hand dealer-hand-so-far rest-of-deck)
