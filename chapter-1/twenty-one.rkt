@@ -121,18 +121,18 @@
 (define (twenty-one strategy)
   ; Dealer strategy - takes card when < 17, always stops when >= 17
   (define (play-dealer customer-hand dealer-hand-so-far rest-of-deck)
-    (cond ((> (best-total dealer-hand-so-far) 21) 1) ; Busts
+    (cond ((> (best-total dealer-hand-so-far) 21) 1) ; Dealer busts
           ; The dealer takes another card (hits)
           ((< (best-total dealer-hand-so-far) 17)
 	   (play-dealer customer-hand
 			(se dealer-hand-so-far (first rest-of-deck))
 			(bf rest-of-deck)))
-	  ((< (best-total customer-hand) (best-total dealer-hand-so-far)) -1)
-	  ((= (best-total customer-hand) (best-total dealer-hand-so-far)) 0)
+	  ((< (best-total customer-hand) (best-total dealer-hand-so-far)) -1) ; Customer loses
+	  ((= (best-total customer-hand) (best-total dealer-hand-so-far)) 0) ; Tie
 	  (else 1)))
 
   (define (play-customer customer-hand-so-far dealer-up-card rest-of-deck)
-    (cond ((> (best-total customer-hand-so-far) 21) -1)
+    (cond ((> (best-total customer-hand-so-far) 21) -1) ; Cusomer busts
 	  ((strategy customer-hand-so-far dealer-up-card)
 	   (play-customer (se customer-hand-so-far (first rest-of-deck))
 			  dealer-up-card
@@ -162,3 +162,19 @@
 	deck
     	(move-card deck '() (random size)) ))
   (shuffle (make-ordered-deck) 52) )
+
+; Plays n blackjack games with a chosen strategy and outputs the final result
+(define (play-n strategy n)
+  (define (play-n-iter result strategy n)
+    (if (= n 0)
+         result
+         (play-n-iter (+ result (twenty-one strategy)) strategy (- n 1))))
+  (play-n-iter 0 strategy n))
+
+; Using linear recursion the procedure would look like this
+;(define (play-n strategy n)
+;  (if (= n 0)
+;    0
+;    (+ (twenty-one strategy) (play-n strategy (- n 1)))))
+
+(play-n stop-at-17 8)
