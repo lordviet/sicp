@@ -114,10 +114,16 @@
 (best-total '(AD 8S 5H)) ; should be 14
 (newline)
 
+; Customer strategies
+(define (stop-at-17 hand dealer-up-card)
+  (< (best-total hand) 17))
+
 (define (twenty-one strategy)
+  ; Dealer strategy - takes card when < 17, always stops when >= 17
   (define (play-dealer customer-hand dealer-hand-so-far rest-of-deck)
-    (cond ((> (best-total dealer-hand-so-far) 21) 1)
-	  ((< (best-total dealer-hand-so-far) 17)
+    (cond ((> (best-total dealer-hand-so-far) 21) 1) ; Busts
+          ; The dealer takes another card (hits)
+          ((< (best-total dealer-hand-so-far) 17)
 	   (play-dealer customer-hand
 			(se dealer-hand-so-far (first rest-of-deck))
 			(bf rest-of-deck)))
