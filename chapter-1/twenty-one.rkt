@@ -107,16 +107,22 @@
 (define (best-total hand)
   (best-total-iter hand))
 
-(print "best-total test")
-(newline)
-(best-total '(AD 8S)) ; should be 19
-(best-total '(AD AS 9H)) ; should be 21
-(best-total '(AD 8S 5H)) ; should be 14
-(newline)
+;(print "best-total test")
+;(newline)
+;(best-total '(AD 8S)) ; should be 19
+;(best-total '(AD AS 9H)) ; should be 21
+;(best-total '(AD 8S 5H)) ; should be 14
+;(newline)
 
 ; Customer strategies
 (define (stop-at-17 hand dealer-up-card)
   (< (best-total hand) 17))
+
+; Returns a lambda that is going to be executed with the param n
+(define (stop-at n)
+  (lambda (hand dealer-up-card) (< (best-total hand) n)))
+
+; End Customer strategies
 
 (define (twenty-one strategy)
   ; Dealer strategy - takes card when < 17, always stops when >= 17
@@ -177,4 +183,7 @@
 ;    0
 ;    (+ (twenty-one strategy) (play-n strategy (- n 1)))))
 
-(play-n stop-at-17 8)
+;(print "play-n test")
+;(newline)
+;(play-n stop-at-17 8)
+;(play-n (stop-at 17) 8)
