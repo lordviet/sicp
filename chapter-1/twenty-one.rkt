@@ -19,6 +19,33 @@
 ;(is-picture-card? '9) ; should be #f
 ;(newline)
 
+; Checks if a card matches a particular suit (C, D, H, S)
+(define (is-card-suit? card suit)
+  (equal? (last card) suit))
+
+; Checks if a given card is in range 2-6
+(define (is-card-in-low-range? card)
+  (define ace-card 'A)
+  (define upper-range-start 7)
+  (define stripped-card (strip-color card))
+  (and
+   (not (is-picture-card? stripped-card))
+   (not (equal? stripped-card ace-card))
+   (< stripped-card upper-range-start)))
+
+; Checks if hand contains a card of the suit hearts
+(define (has-hearts? hand)
+  (define hearts-suit 'H)
+  (cond ((empty? hand) #f)
+        ((equal? (is-card-suit? (first hand) hearts-suit) #t))
+        (else (has-hearts? (bf hand)))))
+
+;(print "has-hearts? tests")
+;(newline)
+;(has-hearts? '(AD 8S)) ; should be #f
+;(has-hearts? '(AD AS 9H)) ; should be #t
+;(has-hearts? '(5H)) ; should be #t
+;(newline)
 ; Counts the number of aces in a hand
 (define (ace-count count hand)
   (if (empty? hand)
@@ -45,7 +72,7 @@
       small-ace-value
       big-ace-value))
 
-;(print "calculate-ace-value")
+;(print "calculate-ace-value tests")
 ;(newline)
 ;(calculate-ace-value 20) ; should be 1
 ;(calculate-ace-value 10) ; should be 11
@@ -59,7 +86,7 @@
        (- ace-count 1)
        (+ total (calculate-ace-value total)))))
 
-;(print "ace-iter test")
+;(print "ace-iter tests")
 ;(newline)
 ;(ace-iter 3 5) ; should be 18
 ;(ace-iter 2 9) ; should be 21
@@ -105,7 +132,7 @@
 (define (best-total hand)
   (best-total-iter hand))
 
-;(print "best-total test")
+;(print "best-total tests")
 ;(newline)
 ;(best-total '(AD 8S)) ; should be 19
 ;(best-total '(AD AS 9H)) ; should be 21
@@ -120,16 +147,6 @@
 (define (stop-at n)
   (lambda (hand dealer-up-card) (< (best-total hand) n)))
 
-; Checks if a given card is in range 2-6
-(define (is-card-in-low-range? card)
-  (define ace-card 'A)
-  (define upper-range-start 7)
-  (define stripped-card (strip-color card))
-  (and
-   (not (is-picture-card? stripped-card))
-   (not (equal? stripped-card ace-card))
-   (< stripped-card upper-range-start))) 
-
 (define (dealer-sensitive hand dealer-up-card)
   (or
    (and
@@ -138,6 +155,20 @@
    (and
     (is-card-in-low-range? dealer-up-card)
     ((stop-at 12) hand dealer-up-card))))
+
+(define (valentine-strategy hand dealer-up-card)
+  (if (has-hearts? hand)
+      ((stop-at 19) hand dealer-up-card)
+      ((stop-at 17) hand dealer-up-card)))
+
+;(print "valentine-strategy tests")
+;(newline)
+;(valentine-strategy '(10D 3C) 'KH) ; should be #t
+;(valentine-strategy '(10D 7H) 'KH) ; should be #t
+;(valentine-strategy '(10D 8H) 'KH) ; should be #t
+;(valentine-strategy '(10D 7C) 'KH) ; should be #f
+;(valentine-strategy '(10D 9H) 'KH) ; should be #f
+;(newline)
 
 ; End Customer strategies
 
@@ -200,8 +231,9 @@
 ;    0
 ;    (+ (twenty-one strategy) (play-n strategy (- n 1)))))
 
-;(print "play-n test")
+;(print "play-n tests")
 ;(newline)
 ;(play-n stop-at-17 8)
 ;(play-n (stop-at 17) 8)
 ;(play-n dealer-sensitive 8)
+;(play-n valentine-strategy 8)
