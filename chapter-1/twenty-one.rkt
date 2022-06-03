@@ -6,11 +6,9 @@
 
 ; Checks if a card is a picture card (K, Q, J)
 (define (is-picture-card? card)
-  (if (or (equal? card 'K)
-          (equal? card 'Q)
-          (equal? card 'J))
-       #t
-       #f))
+  (or (equal? card 'K)
+      (equal? card 'Q)
+      (equal? card 'J)))
 
 ;(print "is-picture-card? tests")
 ;(newline)
@@ -83,7 +81,7 @@
 
 ; Retains only the card without the color AS -> A
 (define (strip-color card)
-  (first card))
+  (bl card))
 
 ; Calculates the total result without the aces
 (define (no-ace-total-iter result hand)
@@ -121,6 +119,25 @@
 ; Returns a lambda that is going to be executed with the param n
 (define (stop-at n)
   (lambda (hand dealer-up-card) (< (best-total hand) n)))
+
+; Checks if a given card is in range 2-6
+(define (is-card-in-low-range? card)
+  (define ace-card 'A)
+  (define upper-range-start 7)
+  (define stripped-card (strip-color card))
+  (and
+   (not (is-picture-card? stripped-card))
+   (not (equal? stripped-card ace-card))
+   (< stripped-card upper-range-start))) 
+
+(define (dealer-sensitive hand dealer-up-card)
+  (or
+   (and
+    (not (is-card-in-low-range? dealer-up-card))
+    ((stop-at 17) hand dealer-up-card))
+   (and
+    (is-card-in-low-range? dealer-up-card)
+    ((stop-at 12) hand dealer-up-card))))
 
 ; End Customer strategies
 
@@ -187,3 +204,4 @@
 ;(newline)
 ;(play-n stop-at-17 8)
 ;(play-n (stop-at 17) 8)
+;(play-n dealer-sensitive 8)
