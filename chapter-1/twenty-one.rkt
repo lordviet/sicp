@@ -212,6 +212,11 @@
 ;((majority stand stand stand) '() 'KH) ; should be #f
 ;(newline)
 
+; This strategy takes one more card than the original strategy would 
+(define (reckless strategy)
+  (lambda (hand dealer-up-card)
+    (strategy (bl hand) dealer-up-card)))
+
 ; End Customer strategies
 
 (define (twenty-one strategy)
@@ -280,3 +285,5 @@
 ;(play-n dealer-sensitive 8)
 ;(play-n valentine-strategy 8)
 ;(play-n (suit-strategy 'S (stop-at 18) (stop-at 15)) 8)
+;(play-n (majority stop-at-17 valentine-strategy dealer-sensitive) 8)
+;(play-n (reckless (stop-at 17)) 8)
