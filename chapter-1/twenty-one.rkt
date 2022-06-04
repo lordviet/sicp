@@ -187,6 +187,31 @@
 ;(valentine-strategy '(10D 9H) 'KH) ; should be #f
 ;(newline)
 
+; Hits only if > 66% (2/3 or 3/3) of the strategies say so
+(define (majority strategy-a strategy-b strategy-c)  
+  (lambda (hand dealer-up-card)
+    (define a-strat-result (strategy-a hand dealer-up-card))
+    (define b-strat-result (strategy-b hand dealer-up-card))
+    (define c-strat-result (strategy-c hand dealer-up-card))
+    ; a ? (b || c) : (b && c)
+    ; if a is true, we need either b or c to be true
+    ; if a is false, we need both b and c to be true
+    (if a-strat-result
+        (or b-strat-result c-strat-result)
+        (and b-strat-result c-strat-result))))
+
+;(print "majority tests")
+;(newline)
+
+;(define (hit hand dealer-up-card) #t)
+;(define (stand hand dealer-up-card) #f)
+
+;((majority hit hit hit) '() 'KH) ; should be #t
+;((majority hit hit stand) '() 'KH) ; should be #t
+;((majority hit stand stand) '() 'KH) ; shuold be #f
+;((majority stand stand stand) '() 'KH) ; should be #f
+;(newline)
+
 ; End Customer strategies
 
 (define (twenty-one strategy)
