@@ -36,9 +36,13 @@
 ; Checks if hand contains a card of the suit hearts
 (define (has-hearts? hand)
   (define hearts-suit 'H)
+  (has-suit? hearts-suit hand))
+
+; Checks if a hand contains a card of suit
+(define (has-suit? suit hand) 
   (cond ((empty? hand) #f)
-        ((equal? (is-card-suit? (first hand) hearts-suit) #t))
-        (else (has-hearts? (bf hand)))))
+        ((equal? (is-card-suit? (first hand) suit) #t))
+        (else (has-suit? suit (bf hand)))))
 
 ;(print "has-hearts? tests")
 ;(newline)
@@ -156,10 +160,23 @@
     (is-card-in-low-range? dealer-up-card)
     ((stop-at 12) hand dealer-up-card))))
 
-(define (valentine-strategy hand dealer-up-card)
+; Returns a different strategy based on whether there the customer hand contains a suit
+(define (suit-strategy suit suit-card-strategy non-suit-card-strategy)
+  (lambda (hand dealer-up-card)
+    (if (has-suit? suit hand)
+        (suit-card-strategy hand dealer-up-card)
+        (non-suit-card-strategy hand dealer-up-card))))
+
+; The original implementation of valentine strategy
+(define (valentine-strategy-og hand dealer-up-card)  
   (if (has-hearts? hand)
       ((stop-at 19) hand dealer-up-card)
       ((stop-at 17) hand dealer-up-card)))
+
+; Refactored version of the valentine strategy using the suit-strategy
+(define (valentine-strategy hand dealer-up-card)
+  (define hearts-suit 'H)
+  ((suit-strategy hearts-suit (stop-at 19) (stop-at 17)) hand dealer-up-card))
 
 ;(print "valentine-strategy tests")
 ;(newline)
@@ -237,3 +254,4 @@
 ;(play-n (stop-at 17) 8)
 ;(play-n dealer-sensitive 8)
 ;(play-n valentine-strategy 8)
+;(play-n (suit-strategy 'S (stop-at 18) (stop-at 15)) 8)
