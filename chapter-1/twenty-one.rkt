@@ -50,6 +50,11 @@
 ;(has-hearts? '(AD AS 9H)) ; should be #t
 ;(has-hearts? '(5H)) ; should be #t
 ;(newline)
+
+; Retains only the card without the color AS -> A
+(define (strip-color card)
+  (bl card))
+
 ; Counts the number of aces in a hand
 (define (ace-count count hand)
   (if (empty? hand)
@@ -109,10 +114,6 @@
          (+
           current-result
           current-card))))
-
-; Retains only the card without the color AS -> A
-(define (strip-color card)
-  (bl card))
 
 ; Calculates the total result without the aces
 (define (no-ace-total-iter result hand)
