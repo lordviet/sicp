@@ -59,3 +59,11 @@
 
 (rectangle-perimeter sample-rectangle)
 (rectangle-area sample-rectangle)
+
+; An alternative representation is to take all 4 points and encapsulate the bundle inside
+(define (make-rectangle-alt a b c d)
+  (cons (make-segment a b)
+        (make-segment c d)))
+
+; There are many ways to represent a rectangle, we can even say that a rectangle is just defined by its width and length
+; What matters here is that our abstractions of perimeter and area will work the same because they only care for width and length
