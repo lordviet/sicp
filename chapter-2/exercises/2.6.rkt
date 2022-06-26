@@ -19,3 +19,18 @@
 (define two
   (lambda (f)
     (lambda (x) (f (f x)))))
+
+; To define a plus operation let's start from a primitive example using currying
+(define add-prim
+  (lambda (n)
+    (lambda (k)
+      (+ n k))))
+
+((add-prim 12) 2)
+
+(define (add a b)
+  (lambda (f)
+    (lambda (x)
+      ((a f) ((b f) x)))))
+
+(((add one two) add1) 0) ; should be 3
